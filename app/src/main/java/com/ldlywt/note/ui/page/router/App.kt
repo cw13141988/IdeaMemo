@@ -2,6 +2,7 @@ package com.ldlywt.note.ui.page.router
 
 import android.annotation.SuppressLint
 import android.os.Build
+import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -18,11 +19,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.ldlywt.note.ui.page.PictureDisplayPage
-import com.ldlywt.note.ui.page.search.SearchPage
 import com.ldlywt.note.ui.page.data.DataCloudConfigPage
 import com.ldlywt.note.ui.page.data.DataManagerPage
 import com.ldlywt.note.ui.page.input.MemoInputPage
 import com.ldlywt.note.ui.page.main.MainScreen
+import com.ldlywt.note.ui.page.search.SearchPage
 import com.ldlywt.note.ui.page.settings.ExplorePage
 import com.ldlywt.note.ui.page.settings.GalleryPage
 import com.ldlywt.note.ui.page.settings.MoreInfoPage
@@ -39,6 +40,17 @@ import com.moriafly.salt.ui.darkSaltColors
 import com.moriafly.salt.ui.lightSaltColors
 import com.moriafly.salt.ui.saltColorsByColorScheme
 import com.moriafly.salt.ui.saltConfigs
+
+fun NavHostController.debouncedPopBackStack() {
+    val currentRoute = this.currentBackStackEntry?.destination?.route
+    val previousRoute = this.previousBackStackEntry?.destination?.route
+
+    if (currentRoute != null && previousRoute != null) {
+        this.popBackStack()
+    } else {
+        Log.w("Navigation", "Attempted to pop empty back stack")
+    }
+}
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(UnstableSaltApi::class)
@@ -150,7 +162,7 @@ fun NavHostContainer(
 
         composable<Screen.PictureDisplay> { navBackStackEntry ->
             val args = navBackStackEntry.toRoute<Screen.PictureDisplay>()
-            PictureDisplayPage(path = args.path, onBack = { navController.popBackStack() })
+            PictureDisplayPage(pathList = args.pathList, index = args.curIndex, navController = navController)
         }
 
         composable<Screen.InputDetail> { navBackStackEntry ->

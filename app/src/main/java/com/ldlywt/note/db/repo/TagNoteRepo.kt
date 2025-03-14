@@ -81,7 +81,7 @@ class TagNoteRepo(
     fun insertOrUpdate(card: Note) {
         val tagList = TopicUtils.getTopicListByString(card.content)
         if (card.locationInfo.isNullOrBlank()) {
-            val pair = CityRegexUtils.getCityByString(card.content)
+            val pair = CityRegexUtils.getCityByString(card.content.trim())
             card.locationInfo = pair?.second
             if (card.locationInfo != null) {
                 card.content = pair?.first ?: ""
@@ -125,5 +125,9 @@ class TagNoteRepo(
     fun getAllLocationInfo(): Flow<List<String>> = noteDao.getAllLocationInfo()
 
     fun getNotesByLocationInfo(targetInfo: String): Flow<List<NoteShowBean>> = noteDao.getNotesByLocationInfo(targetInfo)
+
+    fun clearLocationInfo(locationInfo: String) {
+        noteDao.clearLocationInfo(locationInfo)
+    }
 
 }

@@ -16,8 +16,8 @@ android {
         applicationId = "com.ldlywt.note"
         minSdk = 26
         targetSdk = 35
-        versionCode = 208
-        versionName = "2.0.8"
+        versionCode = 213
+        versionName = "2.1.3"
         vectorDrawables {
             useSupportLibrary = true
         }

@@ -27,8 +27,10 @@
     <string name="user_agree">User Agreement</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="failed">Failed, thanks for your support</string>
+    <string name="export">Export</string>
     <string name="json_export">Export Json</string>
     <string name="txt_export">Export Txt</string>
+    <string name="mk_export">Export MarkDown</string>
     <string name="webdav_backup">Backup</string>
     <string name="webdav_restore">Restore</string>
     <string name="tag_fix">Fix Tag</string>
@@ -71,6 +73,7 @@
     <string name="take_photo">take photo</string>
     <string name="submit">Submit</string>
     <string name="export_data">Data export (without encryption)</string>
+    <string name="export_restore_no_encr">Data restore (without encryption)</string>
     <string name="update_time_desc">Update Time DESC</string>
     <string name="update_time_asc">Update Time ASC</string>
     <string name="create_time_desc">Create Time DESC</string>
@@ -102,4 +105,7 @@
     <string name="new_version">New Version</string>
     <string name="github">Github</string>
     <string name="card_note_maxline">Card MaxLine</string>
+    <string name="delete_location">Are you sure you want to delete %1$s location info?</string>
+    <string name="donate_list">Donate List</string>
+    <string name="thanks">Thanks</string>
 </resources>

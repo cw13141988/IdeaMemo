@@ -35,6 +35,7 @@ data class ExportItem(val dir: String, val file: File)
 object BackUp {
 
     private const val my_key = "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"
+
     suspend fun exportEncrypted(context: Context, uri: Uri): String = suspendCoroutine { continuation ->
         context.contentResolver.openOutputStream(uri)?.use { stream ->
             val cipher = Cipher.getInstance("AES")
@@ -66,21 +67,25 @@ object BackUp {
         }
     }
 
-    suspend fun restoreFromEncryptedZip(context: Context, uri: Uri) = withContext(Dispatchers.IO) {
+    suspend fun restoreFromEncryptedZip(context: Context, uri: Uri, isEncrypt: Boolean) = withContext(Dispatchers.IO) {
         // https://stackoverflow.com/questions/77683434/the-getnextentry-method-of-zipinputstream-throws-a-zipexception-invalid-zip-ent
         if (Build.VERSION.SDK_INT >= 34) {
             ZipPathValidator.clearCallback()
         }
-        context.contentResolver.openInputStream(uri)?.use { encryptedStream ->
-            val cipher = Cipher.getInstance("AES")
-            val secretKey = SecretKeySpec(my_key.toByteArray(), "AES")
-            cipher.init(Cipher.DECRYPT_MODE, secretKey)
+        context.contentResolver.openInputStream(uri)?.use { inputStream ->
+            val stream = if (isEncrypt) {
+                val cipher = Cipher.getInstance("AES")
+                val secretKey = SecretKeySpec(my_key.toByteArray(), "AES")
+                cipher.init(Cipher.DECRYPT_MODE, secretKey)
+                CipherInputStream(inputStream, cipher)
+            } else {
+                inputStream
+            }
 
-            val decryptedStream = CipherInputStream(encryptedStream, cipher)
             val destFile = File(context.cacheDir, "decrypted_restore")
             destFile.mkdirs()
 
-            val zipStream = ZipInputStream(BufferedInputStream(decryptedStream))
+            val zipStream = ZipInputStream(BufferedInputStream(stream))
             var entry = zipStream.nextEntry
             while (entry != null) {
                 val entryFile = File(destFile, entry.name)
@@ -161,6 +166,10 @@ object BackUp {
     }
 
     suspend fun restoreFromSd(uri: Uri) = withContext(Dispatchers.IO) {
+        // https://stackoverflow.com/questions/77683434/the-getnextentry-method-of-zipinputstream-throws-a-zipexception-invalid-zip-ent
+        if (Build.VERSION.SDK_INT >= 34) {
+            ZipPathValidator.clearCallback()
+        }
         val context = App.instance
         App.instance.contentResolver.openInputStream(uri)?.use { stream ->
             val destFile = File(context.cacheDir, "restore")
@@ -196,12 +205,25 @@ object BackUp {
             val ow = OutputStreamWriter(stream)
             val writer = BufferedWriter(ow)
             list.forEachIndexed { _, noteShowBean ->
-                noteShowBean.note.noteTitle?.let {
-                    writer.append("${it}\n")
-                }
                 writer.append("${noteShowBean.note.createTime.toTime()}\n")
-                noteShowBean.note.locationInfo?.let {
-                    writer.append(it.plus("  ".plus(noteShowBean.note.weatherInfo).plus("\n")))
+                if (!noteShowBean.note.locationInfo.isNullOrEmpty()) {
+                    writer.append(noteShowBean.note.locationInfo.plus("\n"))
+                }
+                writer.append(noteShowBean.note.content.plus(""))
+                writer.append("\n\n")
+            }
+            writer.close()
+        }
+    }
+
+    fun exportMarkDownFile(list: List<NoteShowBean>, uri: Uri) {
+        (App.instance.contentResolver.openOutputStream(uri) as? FileOutputStream)?.use { stream ->
+            val ow = OutputStreamWriter(stream)
+            val writer = BufferedWriter(ow)
+            list.forEachIndexed { _, noteShowBean ->
+                writer.append("### ${noteShowBean.note.createTime.toTime()}\n")
+                if (!noteShowBean.note.locationInfo.isNullOrEmpty()) {
+                    writer.append(noteShowBean.note.locationInfo.plus("\n"))
                 }
                 writer.append(noteShowBean.note.content.plus(""))
                 writer.append("\n\n")

@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.FileUpload
+import androidx.compose.material.icons.outlined.FormatColorText
 import androidx.compose.material.icons.outlined.Javascript
 import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material.icons.outlined.Restore
@@ -54,9 +56,11 @@ import com.ldlywt.note.component.LoadingComponent
 import com.ldlywt.note.component.RYDialog
 import com.ldlywt.note.ui.page.LocalMemosState
 import com.ldlywt.note.ui.page.router.Screen
+import com.ldlywt.note.ui.page.router.debouncedPopBackStack
 import com.ldlywt.note.ui.page.settings.SettingsBean
 import com.ldlywt.note.utils.BackUp
 import com.ldlywt.note.utils.ChoseFolderContract
+import com.ldlywt.note.utils.ExportMarkDownContract
 import com.ldlywt.note.utils.ExportNotesJsonContract
 import com.ldlywt.note.utils.ExportTextContract
 import com.ldlywt.note.utils.RestoreNotesContract
@@ -100,7 +104,7 @@ fun DataManagerPage(
     var webInputDialog: Boolean by remember { mutableStateOf(false) }
     val autoBackSwitchState = SharedPreferencesUtils.localAutoBackup.collectAsState(false)
     val jianGuoCloudSwitchState = SharedPreferencesUtils.davLoginSuccess.collectAsState(false)
-    val isLogin =viewModel.isLogin
+    val isLogin = viewModel.isLogin
 
     fun navToWebdavConfigPage() {
         navController.navigate(Screen.DataCloudConfig)
@@ -152,6 +156,14 @@ fun DataManagerPage(
         }
     }
 
+    val exportMarkDownLauncher = rememberLauncherForActivityResult(ExportMarkDownContract("IdeaMemo")) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        lunchIo {
+            BackUp.exportMarkDownFile(list = noteState.notes, uri)
+            toast(R.string.excute_success.str)
+        }
+    }
+
     // Create an ActivityResultLauncher
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument()
@@ -184,11 +196,22 @@ fun DataManagerPage(
         }
     }
 
-    val restoreFromSdLauncher = rememberLauncherForActivityResult(RestoreNotesContract) { uri ->
+    val restoreEncryptFromSdLauncher = rememberLauncherForActivityResult(RestoreNotesContract) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
         lunchMain {
             isLoading = true
-            BackUp.restoreFromEncryptedZip(App.instance, uri)
+            BackUp.restoreFromEncryptedZip(App.instance, uri, true)
+            isLoading = false
+            isShowRestartDialog = true
+        }
+    }
+
+
+    val restoreNoEncryLauncher = rememberLauncherForActivityResult(RestoreNotesContract) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        lunchMain {
+            isLoading = true
+            BackUp.restoreFromSd(uri)
             isLoading = false
             isShowRestartDialog = true
         }
@@ -209,7 +232,7 @@ fun DataManagerPage(
             encryptedExportLauncher.launch(backUpFileName)
         },
         SettingsBean(R.string.data_restore, Icons.Outlined.Restore) {
-            restoreFromSdLauncher.launch(null)
+            restoreEncryptFromSdLauncher.launch(null)
         },
         SettingsBean(R.string.json_export, Icons.Outlined.Javascript) {
             exportNotesJsonLauncher.launch(null)
@@ -217,8 +240,14 @@ fun DataManagerPage(
         SettingsBean(R.string.txt_export, Icons.Outlined.TextFields) {
             exportTxtLauncher.launch(null)
         },
+        SettingsBean(R.string.mk_export, Icons.Outlined.FormatColorText) {
+            exportMarkDownLauncher.launch(null)
+        },
         SettingsBean(R.string.export_data, Icons.Outlined.SaveAlt) {
-            exportLauncher.launch("IdeaMemo.zip")
+            exportLauncher.launch("IdeaMNoEncrypt.zip")
+        },
+        SettingsBean(R.string.export_restore_no_encr, Icons.Outlined.FileUpload) {
+            restoreNoEncryLauncher.launch(null)
         },
     )
 
@@ -232,7 +261,7 @@ fun DataManagerPage(
 
         TitleBar(
             onBack = {
-                navController.popBackStack()
+                navController.debouncedPopBackStack()
             },
             text = R.string.local_data_manager.str
         )
@@ -287,13 +316,13 @@ fun DataManagerPage(
                 text = R.string.webdav_auth.str,
                 state = jianGuoCloudSwitchState.value,
                 onChange = {
-                    if(jianGuoCloudSwitchState.value) {
+                    if (jianGuoCloudSwitchState.value) {
                         scope.launch {
                             SharedPreferencesUtils.clearDavConfig()
                         }
-                    }else {
-                            webInputDialog = true
-                        }
+                    } else {
+                        webInputDialog = true
+                    }
                 }
             )
             if (jianGuoCloudSwitchState.value) {
@@ -338,7 +367,7 @@ fun DataManagerPage(
             val resultPath = viewModel.downloadFileByPath(davData)
             if (!resultPath.isNullOrEmpty()) {
                 val uri = FileProvider.getUriForFile(context, "com.ldlywt.note.provider", File(resultPath))
-                BackUp.restoreFromEncryptedZip(App.instance, uri)
+                BackUp.restoreFromEncryptedZip(App.instance, uri, true)
                 isLoading = false
                 isShowRestartDialog = true
             }
@@ -347,9 +376,9 @@ fun DataManagerPage(
     LoadingComponent(isLoading)
     ConfirmDialog(isShowRestartDialog, title = R.string.restart.str, content = R.string.app_restored.str,
         onDismissRequest = {
-            isShowRestartDialog=false
+            isShowRestartDialog = false
         }, onConfirmRequest = {
-            isShowRestartDialog=false
+            isShowRestartDialog = false
             val packageManager = context.packageManager
             val intent = packageManager.getLaunchIntentForPackage(context.packageName)
             val componentName = intent!!.component
@@ -432,22 +461,22 @@ fun AccountInputDialog(
         ItemTitle(text = R.string.webdav_config.str)
 
         val serverUrl = SharedPreferencesUtils.davServerUrl.collectAsState("")
-        val username =SharedPreferencesUtils.davUserName.collectAsState(null)
-        val password =SharedPreferencesUtils.davPassword.collectAsState(null)
+        val username = SharedPreferencesUtils.davUserName.collectAsState(null)
+        val password = SharedPreferencesUtils.davPassword.collectAsState(null)
         val dataManagerViewMode: DataManagerViewModel = hiltViewModel()
 //        val focusRequester = remember { FocusRequester() }
         ItemEdit(
-            text = serverUrl.value?:"",
+            text = serverUrl.value ?: "",
             onChange = {
                 scope.launch {
-                   SharedPreferencesUtils.updateDavServerUrl(it)
+                    SharedPreferencesUtils.updateDavServerUrl(it)
                 }
             },
             hint = stringResource(R.string.server_url)
         )
 
         ItemEdit(
-            text = username.value?:"" ,
+            text = username.value ?: "",
             onChange = {
                 scope.launch {
                     SharedPreferencesUtils.updateDavUserName(it)
