@@ -32,8 +32,6 @@ Here are the current features:
 - **Continuously Updated** : IdeaMemo is always in use by itself and will be continuously updated.
 - ...
 
-## 🚀 TODO
-[App Subsequent Iteration Plan](https://github.com/ldlywt/IdeaMemo/issues/2)
 
 ## ✈️ Download
 
@@ -49,6 +47,9 @@ Here are the current features:
 - **Report bugs.** Encountered a crash or something went wrong? Create a new *Issue* with as much
   detail as possible to help resolve it.
 - **Enjoy the app.** The best contribution is simply using and enjoying the app I spent so much time on!
+
+## 🌍 Translation
+Multi-language translation is done by AI, there may be errors, please point them out.Thanks!
 
 ## 🤗 Thanks
 This project was created by Compose. Some of the project's code is derived from excellent open-source projects.

@@ -30,8 +30,6 @@
 - **持续更新**：IdeaMemo App 自己一直在使用中，会持续更新。
 - ...
 
-## 🚀 TODO
-[App后续版本已经迭代计划](https://github.com/ldlywt/IdeaMemo/issues/2)
 
 ## ✈️ 下载
 
@@ -40,16 +38,18 @@
      height="80">](https://play.google.com/store/apps/details?id=com.ldlywt.note)
 [<img src="https://s1.ax1x.com/2023/01/12/pSu1a36.png" alt="Get it on GitHub" height="80">](https://github.com/ldlywt/IdeaMemo/releases/latest)     
 
-## 🤝 如果贡献
-- **欢迎贡献代码**，但请不要提交简单的修复代码，有可能会被拒绝！
-- **分享您的想法和建议**，如果您缺少一项功能或有一个有趣的想法，请随时创建一个新的*问题*。
-- **报告错误** 遇到崩溃或出错？创建一个新的*问题*，尽可能详细地尽可能详细，以帮助解决问题。
+## 🤝 贡献指南
+欢迎贡献！请按照以下步骤进行贡献：
+1. Fork 本仓库。
+2. 创建一个新分支（git checkout -b feature-branch-name）。
+3. 提交你的修改（git commit -am 'Add some feature'）。
+4. 推送到分支（git push origin feature-branch-name）。
+5. 创建一个 Pull Request。
 
 ## 🤗 鸣谢
 
 该项目由 Compose 创建。该项目的部分代码源自优秀的开源项目。
 
-我会逐步完善它，但一个人的力量是有限的。欢迎提交 Pull 请求。
 
 **Open Source Projects**
 
@@ -64,6 +64,26 @@ GNU GPL v3.0 © [IdeaMemo](https://github.com/ldlywt/IdeaMemo/blob/master/LICENS
 
 
 您的star是我最大的动力，谢谢！ **🌟**
+
+## ☕️ 捐助
+可以给我买一杯咖啡，让我更有动力继续开发。
+
+<img src="https://github.com/user-attachments/assets/737f222d-cdf4-4091-b95d-9262e678b460" alt="1742624588864" width="163.8" height="245.7" style="margin-right: 200px;">
+
+<img src="https://github.com/user-attachments/assets/c8302f1b-bdef-4ed4-bc06-e5f53bc62380" alt="mm_facetoface_collect_qrcode_1742624668599" width="169" height="230.1">
+
+
+## 🌸 捐赠名单
+
+| 捐赠者名字         | 金额 |
+|-------------------|------|
+| 尧孟张             | 8.8   |
+| +（李刚)           | 5   |
+| Tomo Ebizuka      | 15   |
+| Corcube           | 10   |
+| 奶酪很热情         | 10   |
+| KavenSu          | 10   |
+
 
 ## ⭐ Star History
 
