@@ -80,6 +80,7 @@ android {
         compose = true
         buildConfig = true
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -178,5 +179,8 @@ dependencies {
     implementation ("io.noties.markwon:linkify:$markwon_version")
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation ("com.github.jeziellago:Markwon:58aa5aba6a")
+
+    // Flutter 模块依赖 - 暂时注释掉等解决构建问题
+    // implementation(project(":flutter"))
 
 }

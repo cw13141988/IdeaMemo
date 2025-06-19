@@ -22,6 +22,8 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        
+        // 检查本地自动备份设置
         val localAutoBackup = SharedPreferencesUtils.localAutoBackup.asLiveData().value
         if (localAutoBackup == true) {
             BackupScheduler.scheduleDailyBackup(this)
@@ -29,6 +31,8 @@ class App : Application() {
             BackupScheduler.cancelDailyBackup(this)
         }
 
+        // 应用主题设置
+        @OptIn(DelicateCoroutinesApi::class)
         GlobalScope.launch(Dispatchers.Main) {
             SettingsPreferences.themeMode.collect {
                 SettingsPreferences.applyAppCompatThemeMode(it)
